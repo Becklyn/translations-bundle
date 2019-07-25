@@ -2,7 +2,7 @@
     "name": "becklyn/translations",
     "type": "symfony-bundle",
     "description": "A bundle that extracts translations",
-    "homepage": "https://github.com/Becklyn/translations-extract",
+    "homepage": "https://github.com/Becklyn/translations-bundle",
     "license": "BSD-3-Clause",
     "authors": [
         {
@@ -11,7 +11,11 @@
         }
     ],
     "require": {
-        "php": "^7.2"
+        "php": "^7.2",
+        "symfony/config": "^4.3",
+        "symfony/dependency-injection": "^4.3",
+        "symfony/http-kernel": "^4.3",
+        "symfony/translation-contracts": "^1.1"
     },
     "require-dev": {
         "becklyn/php-cs": "^1.4"
@@ -21,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Becklyn\\TranslationsExtract\\": "src/"
+            "Becklyn\\Translations\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Becklyn\\TranslationsExtract\\": "tests/"
+            "Tests\\Becklyn\\Translations\\": "tests/"
         }
     }
 }
