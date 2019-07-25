@@ -7,6 +7,7 @@ use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -103,12 +104,30 @@ class TranslationsExtractor
         }
 
         $catalogue = $this->translator->getCatalogue($locale);
-        $toFetch = $this->catalogue->getPatterns();
+        $patternsByDomain = $this->catalogue->getPatterns();
         $result = [];
+        $this->extractMessages($catalogue, $patternsByDomain, $result);
+
+        return $result;
+    }
+
+
+    /**
+     * @param MessageCatalogueInterface $catalogue
+     * @param array                     $patternsByDomain
+     * @param array                     $result
+     */
+    private function extractMessages (MessageCatalogueInterface $catalogue, array $patternsByDomain, array &$result) : void
+    {
+        // extract fallback catalogues first, so that the more specific catalogues will overwrite the values
+        if (null !== ($fallbackCatalogue = $catalogue->getFallbackCatalogue()))
+        {
+            $this->extractMessages($fallbackCatalogue, $patternsByDomain, $result);
+        }
 
         foreach ($catalogue->getDomains() as $domain)
         {
-            $patternsToExtract = $toFetch[$domain] ?? [];
+            $patternsToExtract = $patternsByDomain[$domain] ?? [];
 
             if (empty($patternsToExtract))
             {
@@ -128,7 +147,5 @@ class TranslationsExtractor
                 }
             }
         }
-
-        return $result;
     }
 }
