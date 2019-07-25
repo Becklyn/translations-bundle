@@ -72,10 +72,7 @@ class TranslationsExtractor
     {
         $fetchCallback = function () use ($locale)
         {
-            $catalogueJson = \json_encode(
-                $this->extractCatalogue($locale),
-                JsonResponse::DEFAULT_ENCODING_OPTIONS | \JSON_THROW_ON_ERROR
-            );
+            $catalogueJson = \json_encode($this->extractCatalogue($locale), JsonResponse::DEFAULT_ENCODING_OPTIONS);
 
             return new CachedCatalogue(
                 $this->cacheDigestGenerator->calculateDigest($catalogueJson),
