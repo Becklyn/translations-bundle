@@ -34,7 +34,6 @@ becklyn_translations:
             - abc.*
         backend:
             - *.error
-    
     cache_version: 1
 ```
 
