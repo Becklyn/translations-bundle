@@ -1,4 +1,6 @@
 becklyn_translations.dump:
     path: /dump/{locale}
-    controller: 'Becklyn\Translations\Controller\DumpTranslationsCommand::dump'
+    controller: 'Becklyn\Translations\Controller\DumpTranslationsController::dump'
     methods: [GET]
+    requirements:
+        locale: '[a-z]+([-_][a-zA-Z]+)?'
