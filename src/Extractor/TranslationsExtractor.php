@@ -14,7 +14,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslationsExtractor
 {
-    private const CACHE_PREFIX = "becklyn_translations.catalogue";
+    private const CACHE_PREFIX = "becklyn_translations.catalogue.%s.%s";
 
 
     /**
@@ -63,16 +63,17 @@ class TranslationsExtractor
     /**
      * Fetches the catalogue for the given language.
      *
+     * @param string $namespace
      * @param string $locale
      * @param bool   $useCache
      *
      * @return CachedCatalogue
      */
-    public function fetchCatalogue (string $locale, bool $useCache = true) : CachedCatalogue
+    public function fetchCatalogue (string $namespace, string $locale, bool $useCache = true) : CachedCatalogue
     {
-        $fetchCallback = function () use ($locale)
+        $fetchCallback = function () use ($namespace, $locale)
         {
-            $catalogueJson = \json_encode($this->extractCatalogue($locale), JsonResponse::DEFAULT_ENCODING_OPTIONS);
+            $catalogueJson = \json_encode($this->extractCatalogue($namespace, $locale), JsonResponse::DEFAULT_ENCODING_OPTIONS);
 
             return new CachedCatalogue(
                 $this->cacheDigestGenerator->calculateDigest($catalogueJson),
@@ -80,8 +81,9 @@ class TranslationsExtractor
             );
         };
 
+        $cacheKey = \sprintf(self::CACHE_PREFIX, $namespace, $locale);
         return $useCache
-            ? $this->cache->get(self::CACHE_PREFIX . ".{$locale}", $fetchCallback)
+            ? $this->cache->get($cacheKey, $fetchCallback)
             : $fetchCallback();
     }
 
@@ -89,11 +91,12 @@ class TranslationsExtractor
     /**
      * Freshly extracts the catalogue.
      *
+     * @param string $namespace
      * @param string $locale
      *
      * @return array
      */
-    private function extractCatalogue (string $locale) : array
+    private function extractCatalogue (string $namespace, string $locale) : array
     {
         if (!$this->translator instanceof TranslatorBagInterface)
         {
@@ -101,7 +104,7 @@ class TranslationsExtractor
         }
 
         $catalogue = $this->translator->getCatalogue($locale);
-        $patternsByDomain = $this->catalogue->getPatterns();
+        $patternsByDomain = $this->catalogue->getPatterns($namespace);
         $result = [];
         $this->extractMessages($catalogue, $patternsByDomain, $result);
 

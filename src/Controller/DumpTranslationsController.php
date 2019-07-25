@@ -18,11 +18,12 @@ class DumpTranslationsController extends AbstractController
         TranslationsExtractor $extractor,
         ParameterBagInterface $parameters,
         Request $request,
+        string $namespace,
         string $locale
     ) : Response
     {
         $isDebug = $parameters->get("kernel.debug");
-        $catalogue = $extractor->fetchCatalogue($locale, !$isDebug);
+        $catalogue = $extractor->fetchCatalogue($namespace, $locale, !$isDebug);
 
         $response = new JsonResponse(
             // use JSON parse and a string here, as it is way faster than parsing JavaScript in the browser.

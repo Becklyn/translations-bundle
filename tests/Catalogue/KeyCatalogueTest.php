@@ -30,9 +30,31 @@ class KeyCatalogueTest extends TestCase
     public function testRegexify (string $pattern, string $expectedRegex) : void
     {
         $catalogue = new KeyCatalogue();
-        $catalogue->add("a", [$pattern]);
+        $catalogue->add("n", "a", [$pattern]);
 
-        $actual = $catalogue->getPatterns()["a"][0];
+        $actual = $catalogue->getPatterns("n")["a"][0];
         self::assertSame($expectedRegex, $actual);
+    }
+
+
+    /**
+     * Test namespaced access
+     */
+    public function testNamespaces ()
+    {
+        $catalogue = new KeyCatalogue();
+        $catalogue->addNamespaceGrouped([
+            "a" => [
+                "messages" => ["a"],
+            ],
+            "b" => [
+                "messages" => ["b"],
+            ],
+        ]);
+
+        self::assertSame(["messages" => ["/^a$/"]], $catalogue->getPatterns("a"));
+        self::assertSame(["messages" => ["/^b$/"]], $catalogue->getPatterns("b"));
+        self::assertSame([], $catalogue->getPatterns("missing"));
+
     }
 }

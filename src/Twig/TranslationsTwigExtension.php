@@ -38,7 +38,7 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
      *
      * @return string
      */
-    public function renderInit (?string $locale = null) : string
+    public function renderInit (string $namespace, ?string $locale = null) : string
     {
         if (null === $locale)
         {
@@ -54,6 +54,7 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
 
         return $this->locator->get(Environment::class)->render("@BecklynTranslations/init.html.twig", [
             "locale" => $locale,
+            "namespace" => $namespace,
         ]);
     }
 
