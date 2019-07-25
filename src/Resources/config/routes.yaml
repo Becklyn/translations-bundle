@@ -1,0 +1,4 @@
+becklyn_translations.dump:
+    path: /dump/{locale}
+    controller: 'Becklyn\Translations\Controller\DumpTranslationsCommand::dump'
+    methods: [GET]

@@ -1,0 +1,8 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+
+    Becklyn\Translations\:
+        resource: '../../*'
+        exclude: '../../{Resources,BecklynTranslationsBundle.php}'
