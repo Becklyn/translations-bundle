@@ -1,0 +1,32 @@
+{
+    "name": "becklyn/translations",
+    "type": "symfony-bundle",
+    "description": "A bundle that extracts translations",
+    "homepage": "https://github.com/Becklyn/translations-extract",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Becklyn Studios",
+            "homepage": "http://becklyn.com/"
+        }
+    ],
+    "require": {
+        "php": "^7.2"
+    },
+    "require-dev": {
+        "becklyn/php-cs": "^1.4"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Becklyn\\TranslationsExtract\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Becklyn\\TranslationsExtract\\": "tests/"
+        }
+    }
+}
