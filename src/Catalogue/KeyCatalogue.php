@@ -8,7 +8,7 @@ namespace Becklyn\Translations\Catalogue;
 class KeyCatalogue
 {
     /**
-     * @var string[][]
+     * @var string[][][]
      */
     private $domains = [];
 
@@ -17,11 +17,11 @@ class KeyCatalogue
      * @param string $domain
      * @param array  $patterns
      */
-    public function add (string $domain, array $patterns) : void
+    public function add (string $namespace, string $domain, array $patterns) : void
     {
         foreach ($patterns as $pattern)
         {
-            $this->domains[$domain][] = $pattern;
+            $this->domains[$namespace][$domain][] = $pattern;
         }
     }
 
@@ -29,11 +29,23 @@ class KeyCatalogue
     /**
      * @param array $map
      */
-    public function addAll (array $map) : void
+    public function addDomainGrouped (string $namespace, array $map) : void
     {
         foreach ($map as $domain => $patterns)
         {
-            $this->add($domain, $patterns);
+            $this->add($namespace, $domain, $patterns);
+        }
+    }
+
+
+    /**
+     * @param array $map
+     */
+    public function addNamespaceGrouped (array $map) : void
+    {
+        foreach ($map as $namespace => $domainGrouped)
+        {
+            $this->addDomainGrouped($namespace, $domainGrouped);
         }
     }
 
@@ -41,11 +53,11 @@ class KeyCatalogue
     /**
      * @return array
      */
-    public function getPatterns () : array
+    public function getPatterns (string $namespace) : array
     {
         $result = [];
 
-        foreach ($this->domains as $domain => $patterns)
+        foreach (($this->domains[$namespace] ?? []) as $domain => $patterns)
         {
             $entry = [];
 

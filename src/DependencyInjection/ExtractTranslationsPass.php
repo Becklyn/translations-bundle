@@ -11,15 +11,15 @@ class ExtractTranslationsPass implements CompilerPassInterface
     /**
      * @var array
      */
-    private $map;
+    private $namespaceGroupedMap;
 
 
     /**
-     * @param array $map
+     * @param array $namespaceGroupedMap
      */
-    public function __construct (array $map)
+    public function __construct (array $namespaceGroupedMap)
     {
-        $this->map = $map;
+        $this->namespaceGroupedMap = $namespaceGroupedMap;
     }
 
 
@@ -29,6 +29,6 @@ class ExtractTranslationsPass implements CompilerPassInterface
     public function process (ContainerBuilder $container) : void
     {
         $container->getDefinition(KeyCatalogue::class)
-            ->addMethodCall("add", [$this->map]);
+            ->addMethodCall("addNamespaceGrouped", [$this->namespaceGroupedMap]);
     }
 }

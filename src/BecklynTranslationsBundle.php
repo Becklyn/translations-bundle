@@ -34,7 +34,7 @@ class BecklynTranslationsBundle extends Bundle
                 $config = $this->processConfiguration(new BecklynTranslationsConfiguration(), $configs);
 
                 $container->getDefinition(KeyCatalogue::class)
-                    ->addMethodCall("addAll", [$config["extract"]]);
+                    ->addMethodCall("addNamespaceGrouped", [$config["extract"]]);
 
                 $container->getDefinition(CacheDigestGenerator::class)
                     ->setArgument('$version', $config["cache_version"]);
