@@ -12,7 +12,7 @@ First install this package:
 composer require becklyn/translations 
 ```
 
-The import the routing:
+Then import the routing:
 
 
 ```yaml
