@@ -24,10 +24,12 @@ class DumpTranslationsController extends AbstractController
     {
         $isDebug = $parameters->get("kernel.debug");
         $catalogue = $extractor->fetchCatalogue($namespace, $locale, !$isDebug);
+        // we are embedding it inside a string, so we must double escape backslashes
+        $json = \addslashes($catalogue->getCatalogueJson());
 
         $response = new JsonResponse(
             // use JSON parse and a string here, as it is way faster than parsing JavaScript in the browser.
-            "JSON.parse('{$catalogue->getCatalogueJson()}')",
+            "JSON.parse('{$json}')",
             200,
             [
                 // prevent magic byte insertion
