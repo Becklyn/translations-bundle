@@ -14,8 +14,6 @@ class KeyCatalogue
 
 
     /**
-     * @param string $domain
-     * @param array  $patterns
      */
     public function add (string $namespace, string $domain, array $patterns) : void
     {
@@ -27,7 +25,6 @@ class KeyCatalogue
 
 
     /**
-     * @param array $map
      */
     public function addDomainGrouped (string $namespace, array $map) : void
     {
@@ -39,7 +36,6 @@ class KeyCatalogue
 
 
     /**
-     * @param array $map
      */
     public function addNamespaceGrouped (array $map) : void
     {
@@ -51,7 +47,6 @@ class KeyCatalogue
 
 
     /**
-     * @return array
      */
     public function getPatterns (string $namespace) : array
     {

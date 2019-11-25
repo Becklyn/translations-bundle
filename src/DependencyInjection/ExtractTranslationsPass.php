@@ -15,7 +15,6 @@ class ExtractTranslationsPass implements CompilerPassInterface
 
 
     /**
-     * @param array $namespaceGroupedMap
      */
     public function __construct (array $namespaceGroupedMap)
     {
@@ -24,7 +23,6 @@ class ExtractTranslationsPass implements CompilerPassInterface
 
 
     /**
-     * @param ContainerBuilder $container
      */
     public function process (ContainerBuilder $container) : void
     {

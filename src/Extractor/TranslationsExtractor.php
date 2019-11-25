@@ -41,10 +41,6 @@ class TranslationsExtractor
 
 
     /**
-     * @param CacheInterface       $cache
-     * @param TranslatorInterface  $translator
-     * @param CacheDigestGenerator $cacheDigestGenerator
-     * @param KeyCatalogue         $catalogue
      */
     public function __construct (
         CacheInterface $cache,
@@ -62,12 +58,6 @@ class TranslationsExtractor
 
     /**
      * Fetches the catalogue for the given language.
-     *
-     * @param string $namespace
-     * @param string $locale
-     * @param bool   $useCache
-     *
-     * @return CachedCatalogue
      */
     public function fetchCatalogue (string $namespace, string $locale, bool $useCache = true) : CachedCatalogue
     {
@@ -90,11 +80,6 @@ class TranslationsExtractor
 
     /**
      * Freshly extracts the catalogue.
-     *
-     * @param string $namespace
-     * @param string $locale
-     *
-     * @return array
      */
     private function extractCatalogue (string $namespace, string $locale) : array
     {
@@ -113,9 +98,6 @@ class TranslationsExtractor
 
 
     /**
-     * @param MessageCatalogueInterface $catalogue
-     * @param array                     $patternsByDomain
-     * @param array                     $result
      */
     private function extractMessages (MessageCatalogueInterface $catalogue, array $patternsByDomain, array &$result) : void
     {

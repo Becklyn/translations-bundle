@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 class DumpTranslationsController extends AbstractController
 {
     /**
-     * @param string $locale
      */
     public function dump (
         TranslationsExtractor $extractor,

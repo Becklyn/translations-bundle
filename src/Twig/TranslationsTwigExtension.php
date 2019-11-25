@@ -24,7 +24,6 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
 
 
     /**
-     * @param RequestStack $requestStack
      */
     public function __construct (ContainerInterface $locator, RequestStack $requestStack)
     {
@@ -34,9 +33,7 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
 
 
     /**
-     * @param string|null $locale
      *
-     * @return string
      */
     public function renderInit (string $namespace, ?string $locale = null) : string
     {

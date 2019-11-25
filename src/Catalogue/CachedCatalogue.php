@@ -17,8 +17,6 @@ class CachedCatalogue
 
 
     /**
-     * @param string $hash
-     * @param string $catalogueJson
      */
     public function __construct (string $hash, string $catalogueJson)
     {
@@ -28,7 +26,6 @@ class CachedCatalogue
 
 
     /**
-     * @return string
      */
     public function getHash () : string
     {
@@ -37,7 +34,6 @@ class CachedCatalogue
 
 
     /**
-     * @return string
      */
     public function getCatalogueJson () : string
     {
