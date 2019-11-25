@@ -13,20 +13,31 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
-        "symfony/cache-contracts": "^1.1",
-        "symfony/config": "^4.3",
-        "symfony/dependency-injection": "^4.3",
-        "symfony/framework-bundle": "^4.3",
-        "symfony/http-kernel": "^4.3",
-        "symfony/translation": "^4.3",
-        "symfony/translation-contracts": "^1.1",
-        "twig/twig": "^2.11"
+        "symfony/cache-contracts": "^1.1 || ^2.0",
+        "symfony/config": "^4.3 || ^5.0",
+        "symfony/dependency-injection": "^4.3 || ^5.0",
+        "symfony/framework-bundle": "^4.3 || ^5.0",
+        "symfony/http-kernel": "^4.3 || ^5.0",
+        "symfony/translation": "^4.3 || ^5.0",
+        "symfony/translation-contracts": "^1.1 || ^2.0",
+        "twig/twig": "^2.11 || ^3.0"
     },
     "require-dev": {
-        "becklyn/php-cs": "^1.4"
+        "becklyn/php-cs": "^3.0.1",
+        "symfony/phpunit-bridge": "^5.0",
+        "tm/tooly-composer-script": "^1.4"
     },
     "config": {
         "sort-packages": true
+    },
+    "extra": {
+        "tools": {
+            "php-cs-fixer": {
+                "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.16.0/php-cs-fixer.phar",
+                "sign-url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.16.0/php-cs-fixer.phar.asc",
+                "only-dev": true
+            }
+        }
     },
     "autoload": {
         "psr-4": {
@@ -37,5 +48,9 @@
         "psr-4": {
             "Tests\\Becklyn\\Translations\\": "tests/"
         }
+    },
+    "scripts": {
+        "post-install-cmd": "Tooly\\ScriptHandler::installPharTools",
+        "post-update-cmd": "Tooly\\ScriptHandler::installPharTools"
     }
 }

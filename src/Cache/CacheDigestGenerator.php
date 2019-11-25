@@ -11,7 +11,6 @@ class CacheDigestGenerator
 
 
     /**
-     * @param int $version
      */
     public function __construct (int $version)
     {
@@ -20,9 +19,7 @@ class CacheDigestGenerator
 
 
     /**
-     * @param string $catalogue
      *
-     * @return string
      */
     public function calculateDigest (string $catalogue) : string
     {
