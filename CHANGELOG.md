@@ -1,3 +1,10 @@
+1.0.3
+=====
+
+*   (bug) Properly compile translations before dumping.
+*   (internal) Update bundle infrastructure.
+
+
 1.0.2
 =====
 

@@ -13,15 +13,15 @@ class CachedCatalogue
     /**
      * @var string
      */
-    private $catalogueJson;
+    private $compiledCatalogue;
 
 
     /**
      */
-    public function __construct (string $hash, string $catalogueJson)
+    public function __construct (string $hash, string $compiledCatalogue)
     {
         $this->hash = $hash;
-        $this->catalogueJson = $catalogueJson;
+        $this->compiledCatalogue = $compiledCatalogue;
     }
 
 
@@ -35,8 +35,8 @@ class CachedCatalogue
 
     /**
      */
-    public function getCatalogueJson () : string
+    public function getCompiledCatalogue () : string
     {
-        return $this->catalogueJson;
+        return $this->compiledCatalogue;
     }
 }

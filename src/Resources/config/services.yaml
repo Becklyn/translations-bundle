@@ -6,3 +6,6 @@ services:
     Becklyn\Translations\:
         resource: '../../*'
         exclude: '../../{Resources,BecklynTranslationsBundle.php}'
+
+    Becklyn\Translations\Extractor\TranslationsCompiler:
+        $projectDir: '%kernel.project_dir%'

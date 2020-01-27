@@ -5,7 +5,6 @@ namespace Becklyn\Translations\Controller;
 use Becklyn\Translations\Extractor\TranslationsExtractor;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,21 +22,20 @@ class DumpTranslationsController extends AbstractController
     {
         $isDebug = $parameters->get("kernel.debug");
         $catalogue = $extractor->fetchCatalogue($namespace, $locale, !$isDebug);
-        // we are embedding it inside a string, so we must double escape backslashes
-        $json = \addslashes($catalogue->getCatalogueJson());
 
-        $response = new JsonResponse(
-            // use JSON parse and a string here, as it is way faster than parsing JavaScript in the browser.
-            "JSON.parse('{$json}')",
+        $response = new Response(
+            \sprintf(
+                "/**/%s(%s);",
+                "window.TranslatorInit.init",
+                $catalogue->getCompiledCatalogue()
+            ),
             200,
             [
                 // prevent magic byte insertion
                 "X-Content-Type-Options" => "nosniff",
-            ],
-            true
+                "Content-Type" => "text/javascript",
+            ]
         );
-
-        $response->setCallback("window.TranslatorInit.init");
 
         if (!$isDebug)
         {
