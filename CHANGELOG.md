@@ -1,3 +1,9 @@
+1.0.3
+=====
+
+*   (bug) Properly compile translations before dumping.
+
+
 1.0.2
 =====
 

@@ -5,8 +5,10 @@ namespace Becklyn\Translations\Extractor;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
+use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -41,18 +43,26 @@ class TranslationsExtractor
 
 
     /**
+     * @var TranslationsCompiler
+     */
+    private $translationsCompiler;
+
+
+    /**
      */
     public function __construct (
         CacheInterface $cache,
         TranslatorInterface $translator,
         CacheDigestGenerator $cacheDigestGenerator,
-        KeyCatalogue $catalogue
+        KeyCatalogue $catalogue,
+        TranslationsCompiler $translationsCompiler
     )
     {
         $this->cache = $cache;
         $this->translator = $translator;
         $this->cacheDigestGenerator = $cacheDigestGenerator;
         $this->catalogue = $catalogue;
+        $this->translationsCompiler = $translationsCompiler;
     }
 
 
@@ -63,11 +73,13 @@ class TranslationsExtractor
     {
         $fetchCallback = function () use ($namespace, $locale)
         {
-            $catalogueJson = \json_encode($this->extractCatalogue($namespace, $locale), JsonResponse::DEFAULT_ENCODING_OPTIONS);
+            $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
+                $this->extractCatalogue($namespace, $locale)
+            );
 
             return new CachedCatalogue(
-                $this->cacheDigestGenerator->calculateDigest($catalogueJson),
-                $catalogueJson
+                $this->cacheDigestGenerator->calculateDigest($compiledCatalogue),
+                $compiledCatalogue
             );
         };
 
