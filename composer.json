@@ -7,7 +7,7 @@
     "authors": [
         {
             "name": "Becklyn Studios",
-            "homepage": "http://becklyn.com/"
+            "homepage": "https://becklyn.com/"
         }
     ],
     "require": {
@@ -23,20 +23,15 @@
         "twig/twig": "^2.11 || ^3.0"
     },
     "require-dev": {
-        "becklyn/php-cs": "^3.0.1",
-        "symfony/phpunit-bridge": "^5.0",
-        "tm/tooly-composer-script": "^1.4"
+        "symfony/phpunit-bridge": "^5.0"
     },
     "config": {
         "sort-packages": true
     },
     "extra": {
-        "tools": {
-            "php-cs-fixer": {
-                "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.16.0/php-cs-fixer.phar",
-                "sign-url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.16.0/php-cs-fixer.phar.asc",
-                "only-dev": true
-            }
+        "branch-alias": {
+            "dev-master": "1.x-dev",
+            "dev-next": "1.x-dev"
         }
     },
     "autoload": {
@@ -48,9 +43,5 @@
         "psr-4": {
             "Tests\\Becklyn\\Translations\\": "tests/"
         }
-    },
-    "scripts": {
-        "post-install-cmd": "Tooly\\ScriptHandler::installPharTools",
-        "post-update-cmd": "Tooly\\ScriptHandler::installPharTools"
     }
 }
