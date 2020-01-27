@@ -13,7 +13,6 @@ class TranslationsCompiler
 
 
     /**
-     * @param string $projectDir
      */
     public function __construct (string $projectDir)
     {
