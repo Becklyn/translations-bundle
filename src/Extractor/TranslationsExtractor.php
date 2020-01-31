@@ -9,7 +9,10 @@ use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
 use Symfony\Component\Config\ConfigCacheFactory;
 use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
+use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -39,6 +42,9 @@ class TranslationsExtractor
     /** @var bool */
     private $isDebug;
 
+    /** @var KernelInterface */
+    private $kernel;
+
 
     /**
      */
@@ -47,6 +53,7 @@ class TranslationsExtractor
         CacheDigestGenerator $cacheDigestGenerator,
         KeyCatalogue $catalogue,
         TranslationsCompiler $translationsCompiler,
+        KernelInterface $kernel,
         string $cacheDir,
         bool $isDebug
     )
@@ -65,13 +72,14 @@ class TranslationsExtractor
         $this->translationsCompiler = $translationsCompiler;
         $this->cacheDir = $cacheDir;
         $this->isDebug = $isDebug;
+        $this->kernel = $kernel;
     }
 
 
     /**
      * Fetches the catalogue for the given language.
      */
-    public function fetchCatalogue (string $namespace, string $locale, bool $useCache = true) : CachedCatalogue
+    public function fetchCatalogue (string $namespace, string $locale) : CachedCatalogue
     {
         $cache = $this->getConfigCacheFactory()->cache(
             "{$this->cacheDir}/" . \sprintf(self::CACHE_PATH, $namespace, $locale),
@@ -89,7 +97,7 @@ class TranslationsExtractor
                         \var_export($digest, true),
                         \var_export($compiledCatalogue, true)
                     ),
-                    $this->translator->getCatalogue($locale)->getResources()
+                    $this->getTrackedResources($locale)
                 );
             }
         );
@@ -173,5 +181,30 @@ class TranslationsExtractor
     public function setConfigCacheFactory (ConfigCacheFactoryInterface $factory) : void
     {
         $this->configCacheFactory = $factory;
+    }
+
+
+    /**
+     * @param string $locale
+     *
+     * @return ResourceInterface[]
+     */
+    private function getTrackedResources (string $locale) : array
+    {
+        $resources = $this->translator->getCatalogue($locale)->getResources();
+
+        // we also need to add all bundle classes as resource, as they define the exported
+        // messages
+        foreach ($this->kernel->getBundles() as $bundle)
+        {
+            $filePath = (new \ReflectionObject($bundle))->getFileName();
+
+            if ($filePath)
+            {
+                $resources[] = new FileResource($filePath);
+            }
+        }
+
+        return $resources;
     }
 }
