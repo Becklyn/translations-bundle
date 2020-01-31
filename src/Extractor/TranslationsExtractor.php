@@ -5,85 +5,106 @@ namespace Becklyn\Translations\Extractor;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
+use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
+use Symfony\Component\Config\ConfigCacheFactory;
+use Symfony\Component\Config\ConfigCacheFactoryInterface;
+use Symfony\Component\Config\ConfigCacheInterface;
+use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslationsExtractor
 {
-    private const CACHE_PREFIX = "becklyn_translations.catalogue.%s.%s";
+    private const CACHE_PATH = "becklyn/javscript_translations/dump_%s_%s.php";
 
-
-    /**
-     * @var CacheInterface
-     */
-    private $cache;
-
-    /**
-     * @var TranslatorInterface
-     */
+    /** @var TranslatorInterface&TranslatorBagInterface */
     private $translator;
 
-
-    /**
-     * @var CacheDigestGenerator
-     */
+    /** @var CacheDigestGenerator */
     private $cacheDigestGenerator;
 
-
-    /**
-     * @var KeyCatalogue
-     */
+    /** @var KeyCatalogue */
     private $catalogue;
 
-
-    /**
-     * @var TranslationsCompiler
-     */
+    /** @var TranslationsCompiler */
     private $translationsCompiler;
+
+    /** @var ConfigCacheFactoryInterface|null */
+    private $configCacheFactory;
+
+    /** @var string */
+    private $cacheDir;
+
+    /** @var bool */
+    private $isDebug;
+
+    /** @var KernelInterface */
+    private $kernel;
 
 
     /**
      */
     public function __construct (
-        CacheInterface $cache,
         TranslatorInterface $translator,
         CacheDigestGenerator $cacheDigestGenerator,
         KeyCatalogue $catalogue,
-        TranslationsCompiler $translationsCompiler
+        TranslationsCompiler $translationsCompiler,
+        KernelInterface $kernel,
+        string $cacheDir,
+        bool $isDebug
     )
     {
-        $this->cache = $cache;
+        if (!$translator instanceof TranslatorBagInterface)
+        {
+            throw new TranslationsCompilationFailedException(\sprintf(
+                "Can only extract messages from translator with translator bag, but '%s' given.",
+                \get_class($translator)
+            ));
+        }
+
         $this->translator = $translator;
         $this->cacheDigestGenerator = $cacheDigestGenerator;
         $this->catalogue = $catalogue;
         $this->translationsCompiler = $translationsCompiler;
+        $this->cacheDir = $cacheDir;
+        $this->isDebug = $isDebug;
+        $this->kernel = $kernel;
     }
 
 
     /**
      * Fetches the catalogue for the given language.
      */
-    public function fetchCatalogue (string $namespace, string $locale, bool $useCache = true) : CachedCatalogue
+    public function fetchCatalogue (string $namespace, string $locale) : CachedCatalogue
     {
-        $fetchCallback = function () use ($namespace, $locale)
-        {
-            $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
-                $this->extractCatalogue($namespace, $locale)
-            );
+        $cache = $this->getConfigCacheFactory()->cache(
+            "{$this->cacheDir}/" . \sprintf(self::CACHE_PATH, $namespace, $locale),
+            function (ConfigCacheInterface $cache) use ($namespace, $locale) : void
+            {
+                $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
+                    $this->extractCatalogue($namespace, $locale)
+                );
+                $digest = $this->cacheDigestGenerator->calculateDigest($compiledCatalogue);
 
-            return new CachedCatalogue(
-                $this->cacheDigestGenerator->calculateDigest($compiledCatalogue),
-                $compiledCatalogue
-            );
-        };
+                $cache->write(
+                    \sprintf(
+                        '<?php return new %s(%s, %s);',
+                        CachedCatalogue::class,
+                        \var_export($digest, true),
+                        \var_export($compiledCatalogue, true)
+                    ),
+                    $this->getTrackedResources($locale)
+                );
+            }
+        );
 
-        $cacheKey = \sprintf(self::CACHE_PREFIX, $namespace, $locale);
-        return $useCache
-            ? $this->cache->get($cacheKey, $fetchCallback)
-            : $fetchCallback();
+        /** @var CachedCatalogue $catalogue */
+        $catalogue = include $cache->getPath();
+        return $catalogue;
     }
 
 
@@ -138,5 +159,50 @@ class TranslationsExtractor
                 }
             }
         }
+    }
+
+
+    /**
+     * Creates and returns a new config cache
+     */
+    private function getConfigCacheFactory () : ConfigCacheFactoryInterface
+    {
+        if (null === $this->configCacheFactory)
+        {
+            $this->configCacheFactory = new ConfigCacheFactory($this->isDebug);
+        }
+
+        return $this->configCacheFactory;
+    }
+
+
+    /**
+     */
+    public function setConfigCacheFactory (ConfigCacheFactoryInterface $factory) : void
+    {
+        $this->configCacheFactory = $factory;
+    }
+
+
+    /**
+     * @return ResourceInterface[]
+     */
+    private function getTrackedResources (string $locale) : array
+    {
+        $resources = $this->translator->getCatalogue($locale)->getResources();
+
+        // we also need to add all bundle classes as resource, as they define the exported
+        // messages
+        foreach ($this->kernel->getBundles() as $bundle)
+        {
+            $filePath = (new \ReflectionObject($bundle))->getFileName();
+
+            if ($filePath)
+            {
+                $resources[] = new FileResource($filePath);
+            }
+        }
+
+        return $resources;
     }
 }
