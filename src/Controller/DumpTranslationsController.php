@@ -21,7 +21,7 @@ class DumpTranslationsController extends AbstractController
     ) : Response
     {
         $isDebug = $parameters->get("kernel.debug");
-        $catalogue = $extractor->fetchCatalogue($namespace, $locale, !$isDebug);
+        $catalogue = $extractor->fetchCatalogue($namespace, $locale);
 
         $response = new Response(
             \sprintf(
