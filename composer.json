@@ -13,6 +13,7 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
+        "becklyn/cache": "dev-master",
         "symfony/config": "^4.3 || ^5.0",
         "symfony/dependency-injection": "^4.3 || ^5.0",
         "symfony/framework-bundle": "^4.3 || ^5.0",
@@ -23,6 +24,7 @@
         "twig/twig": "^2.11 || ^3.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-master",
         "symfony/phpunit-bridge": "^5.0"
     },
     "config": {
