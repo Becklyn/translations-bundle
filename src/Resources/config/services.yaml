@@ -2,10 +2,11 @@ services:
     _defaults:
         autoconfigure: true
         autowire: true
+        bind:
+            $projectDir: '%kernel.project_dir%'
+            $cacheDir: '%kernel.cache_dir%'
+            $isDebug: '%kernel.debug%'
 
     Becklyn\Translations\:
         resource: '../../*'
         exclude: '../../{Resources,BecklynTranslationsBundle.php}'
-
-    Becklyn\Translations\Extractor\TranslationsCompiler:
-        $projectDir: '%kernel.project_dir%'

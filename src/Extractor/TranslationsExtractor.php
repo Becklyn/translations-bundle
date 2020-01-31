@@ -15,33 +15,19 @@ class TranslationsExtractor
 {
     private const CACHE_PREFIX = "becklyn_translations.catalogue.%s.%s";
 
-
-    /**
-     * @var CacheInterface
-     */
+    /** @var CacheInterface */
     private $cache;
 
-    /**
-     * @var TranslatorInterface
-     */
+    /** @var TranslatorInterface */
     private $translator;
 
-
-    /**
-     * @var CacheDigestGenerator
-     */
+    /** @var CacheDigestGenerator */
     private $cacheDigestGenerator;
 
-
-    /**
-     * @var KeyCatalogue
-     */
+    /** @var KeyCatalogue */
     private $catalogue;
 
-
-    /**
-     * @var TranslationsCompiler
-     */
+    /** @var TranslationsCompiler */
     private $translationsCompiler;
 
 
