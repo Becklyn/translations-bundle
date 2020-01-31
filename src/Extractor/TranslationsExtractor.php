@@ -5,8 +5,12 @@ namespace Becklyn\Translations\Extractor;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
+use Symfony\Component\Config\ConfigCacheFactory;
+use Symfony\Component\Config\ConfigCacheFactoryInterface;
+use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
 use Symfony\Component\Translation\MessageCatalogueInterface;
+use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -14,11 +18,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class TranslationsExtractor
 {
     private const CACHE_PREFIX = "becklyn_translations.catalogue.%s.%s";
+    private const CACHE_PATH = "becklyn/javscript_translations/dump_%s_%s.php";
 
     /** @var CacheInterface */
     private $cache;
 
-    /** @var TranslatorInterface */
+    /** @var Translator */
     private $translator;
 
     /** @var CacheDigestGenerator */
@@ -30,12 +35,21 @@ class TranslationsExtractor
     /** @var TranslationsCompiler */
     private $translationsCompiler;
 
+    /** @var ConfigCacheFactoryInterface|null */
+    private $configCacheFactory;
+
+    /** @var string */
+    private $cacheDir;
+
+    /** @var bool */
+    private $isDebug;
+
 
     /**
      */
     public function __construct (
         CacheInterface $cache,
-        TranslatorInterface $translator,
+        Translator $translator,
         CacheDigestGenerator $cacheDigestGenerator,
         KeyCatalogue $catalogue,
         TranslationsCompiler $translationsCompiler
@@ -54,6 +68,27 @@ class TranslationsExtractor
      */
     public function fetchCatalogue (string $namespace, string $locale, bool $useCache = true) : CachedCatalogue
     {
+        $cache = $this->getConfigCacheFactory()->cache(
+            "{$this->cacheDir}/" . \sprintf(self::CACHE_PATH, $namespace, $locale),
+            function (ConfigCacheInterface $cache) use ($namespace, $locale) : void
+            {
+                $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
+                    $this->extractCatalogue($namespace, $locale)
+                );
+                $digest = $this->cacheDigestGenerator->calculateDigest($compiledCatalogue);
+
+                $cache->write(
+                    \sprintf(
+                        '<?php return new %s(%s, %s);',
+                        CachedCatalogue::class,
+                        $digest,
+                        $compiledCatalogue
+                    ),
+                    $this->translator->getCatalogue($locale)->getResources()
+                );
+            }
+        );
+
         $fetchCallback = function () use ($namespace, $locale)
         {
             $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
@@ -124,5 +159,27 @@ class TranslationsExtractor
                 }
             }
         }
+    }
+
+
+    /**
+     * Creates and returns a new config cache
+     */
+    private function getConfigCacheFactory () : ConfigCacheFactoryInterface
+    {
+        if (null === $this->configCacheFactory)
+        {
+            $this->configCacheFactory = new ConfigCacheFactory($this->isDebug);
+        }
+
+        return $this->configCacheFactory;
+    }
+
+
+    /**
+     */
+    public function setConfigCacheFactory (ConfigCacheFactoryInterface $factory) : void
+    {
+        $this->configCacheFactory = $factory;
     }
 }

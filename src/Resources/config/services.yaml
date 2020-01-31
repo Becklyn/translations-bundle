@@ -10,3 +10,9 @@ services:
     Becklyn\Translations\:
         resource: '../../*'
         exclude: '../../{Resources,BecklynTranslationsBundle.php}'
+
+    Becklyn\Translations\Extractor\TranslationsExtractor:
+        calls:
+            - method: setConfigCacheFactory
+              arguments:
+                  - '@config_cache_factory'
