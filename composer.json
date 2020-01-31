@@ -13,7 +13,6 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
-        "symfony/cache-contracts": "^1.1 || ^2.0",
         "symfony/config": "^4.3 || ^5.0",
         "symfony/dependency-injection": "^4.3 || ^5.0",
         "symfony/framework-bundle": "^4.3 || ^5.0",

@@ -5,25 +5,20 @@ namespace Becklyn\Translations\Extractor;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
+use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
 use Symfony\Component\Config\ConfigCacheFactory;
 use Symfony\Component\Config\ConfigCacheFactoryInterface;
 use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
 use Symfony\Component\Translation\MessageCatalogueInterface;
-use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\TranslatorBagInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslationsExtractor
 {
-    private const CACHE_PREFIX = "becklyn_translations.catalogue.%s.%s";
     private const CACHE_PATH = "becklyn/javscript_translations/dump_%s_%s.php";
 
-    /** @var CacheInterface */
-    private $cache;
-
-    /** @var Translator */
+    /** @var TranslatorInterface&TranslatorBagInterface */
     private $translator;
 
     /** @var CacheDigestGenerator */
@@ -48,18 +43,28 @@ class TranslationsExtractor
     /**
      */
     public function __construct (
-        CacheInterface $cache,
-        Translator $translator,
+        TranslatorInterface $translator,
         CacheDigestGenerator $cacheDigestGenerator,
         KeyCatalogue $catalogue,
-        TranslationsCompiler $translationsCompiler
+        TranslationsCompiler $translationsCompiler,
+        string $cacheDir,
+        bool $isDebug
     )
     {
-        $this->cache = $cache;
+        if (!$translator instanceof TranslatorBagInterface)
+        {
+            throw new TranslationsCompilationFailedException(\sprintf(
+                "Can only extract messages from translator with translator bag, but '%s' given.",
+                \get_class($translator)
+            ));
+        }
+
         $this->translator = $translator;
         $this->cacheDigestGenerator = $cacheDigestGenerator;
         $this->catalogue = $catalogue;
         $this->translationsCompiler = $translationsCompiler;
+        $this->cacheDir = $cacheDir;
+        $this->isDebug = $isDebug;
     }
 
 
@@ -81,30 +86,17 @@ class TranslationsExtractor
                     \sprintf(
                         '<?php return new %s(%s, %s);',
                         CachedCatalogue::class,
-                        $digest,
-                        $compiledCatalogue
+                        \var_export($digest, true),
+                        \var_export($compiledCatalogue, true)
                     ),
                     $this->translator->getCatalogue($locale)->getResources()
                 );
             }
         );
 
-        $fetchCallback = function () use ($namespace, $locale)
-        {
-            $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
-                $this->extractCatalogue($namespace, $locale)
-            );
-
-            return new CachedCatalogue(
-                $this->cacheDigestGenerator->calculateDigest($compiledCatalogue),
-                $compiledCatalogue
-            );
-        };
-
-        $cacheKey = \sprintf(self::CACHE_PREFIX, $namespace, $locale);
-        return $useCache
-            ? $this->cache->get($cacheKey, $fetchCallback)
-            : $fetchCallback();
+        /** @var CachedCatalogue $catalogue */
+        $catalogue = include $cache->getPath();
+        return $catalogue;
     }
 
 
