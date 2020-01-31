@@ -185,8 +185,6 @@ class TranslationsExtractor
 
 
     /**
-     * @param string $locale
-     *
      * @return ResourceInterface[]
      */
     private function getTrackedResources (string $locale) : array
