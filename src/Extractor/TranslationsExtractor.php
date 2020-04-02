@@ -3,13 +3,11 @@
 namespace Becklyn\Translations\Extractor;
 
 use Becklyn\Cache\Cache\SimpleCacheFactory;
+use Becklyn\Cache\Cache\SimpleCacheItemInterface;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
 use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
-use Symfony\Component\Config\ConfigCacheFactory;
-use Symfony\Component\Config\ConfigCacheFactoryInterface;
-use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
@@ -74,7 +72,16 @@ class TranslationsExtractor
      */
     public function fetchCatalogue (string $namespace, string $locale) : CachedCatalogue
     {
-        $item = $this->cacheFactory->getItem(
+        return $this->getCacheItem($namespace, $locale)->get();
+    }
+
+
+    /**
+     *
+     */
+    private function getCacheItem (string $namespace, string $locale) : SimpleCacheItemInterface
+    {
+        return $this->cacheFactory->getItem(
             \sprintf(self::CACHE_KEY, $namespace, $locale),
             function () use ($namespace, $locale)
             {
@@ -89,8 +96,6 @@ class TranslationsExtractor
             },
             $this->getTrackedResources($locale)
         );
-
-        return $item->get();
     }
 
 
@@ -168,5 +173,14 @@ class TranslationsExtractor
         }
 
         return $resources;
+    }
+
+
+    /**
+     * Resets + warms up the cache for the given combination.
+     */
+    public function resetCache (string $namespace, string $locale)
+    {
+        $this->getCacheItem($namespace, $locale)->warmup();
     }
 }

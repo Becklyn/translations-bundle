@@ -71,4 +71,13 @@ class KeyCatalogue
 
         return $result;
     }
+
+
+    /**
+     * @return string[]
+     */
+    public function getNamespaces () : array
+    {
+        return \array_keys($this->domains);
+    }
 }

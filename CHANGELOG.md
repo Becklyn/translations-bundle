@@ -1,3 +1,9 @@
+1.0.5
+=====
+
+*   (improvement) Make `ConfigCache` more reliable and avoid issues due to symfony's inconsistent resource tracking.   
+
+
 1.0.4
 =====
 

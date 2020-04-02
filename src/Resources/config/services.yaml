@@ -4,7 +4,6 @@ services:
         autowire: true
         bind:
             $projectDir: '%kernel.project_dir%'
-            $isDebug: '%kernel.debug%'
 
     Becklyn\Translations\:
         resource: '../../*'
