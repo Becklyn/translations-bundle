@@ -36,7 +36,7 @@ class TranslationsCacheWarmer implements CacheWarmerInterface
     /**
      * @inheritDoc
      */
-    public function warmUp (string $cacheDir)
+    public function warmUp (string $cacheDir) : void
     {
         $locales = ["de", "en"];
 

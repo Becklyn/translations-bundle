@@ -179,7 +179,7 @@ class TranslationsExtractor
     /**
      * Resets + warms up the cache for the given combination.
      */
-    public function resetCache (string $namespace, string $locale)
+    public function resetCache (string $namespace, string $locale) : void
     {
         $this->getCacheItem($namespace, $locale)->warmup();
     }
