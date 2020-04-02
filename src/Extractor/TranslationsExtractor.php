@@ -2,13 +2,12 @@
 
 namespace Becklyn\Translations\Extractor;
 
+use Becklyn\Cache\Cache\SimpleCacheFactory;
+use Becklyn\Cache\Cache\SimpleCacheItemInterface;
 use Becklyn\Translations\Cache\CacheDigestGenerator;
 use Becklyn\Translations\Catalogue\CachedCatalogue;
 use Becklyn\Translations\Catalogue\KeyCatalogue;
 use Becklyn\Translations\Exception\TranslationsCompilationFailedException;
-use Symfony\Component\Config\ConfigCacheFactory;
-use Symfony\Component\Config\ConfigCacheFactoryInterface;
-use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\HttpFoundation\File\Exception\UnexpectedTypeException;
@@ -19,7 +18,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslationsExtractor
 {
-    private const CACHE_PATH = "becklyn/javscript_translations/dump_%s_%s.php";
+    private const CACHE_KEY = "becklyn.javascript_translations.dump_%s_%s";
 
     /** @var TranslatorInterface&TranslatorBagInterface */
     private $translator;
@@ -33,17 +32,11 @@ class TranslationsExtractor
     /** @var TranslationsCompiler */
     private $translationsCompiler;
 
-    /** @var ConfigCacheFactoryInterface|null */
-    private $configCacheFactory;
-
-    /** @var string */
-    private $cacheDir;
-
-    /** @var bool */
-    private $isDebug;
-
     /** @var KernelInterface */
     private $kernel;
+
+    /** @var SimpleCacheFactory */
+    private $cacheFactory;
 
 
     /**
@@ -53,9 +46,8 @@ class TranslationsExtractor
         CacheDigestGenerator $cacheDigestGenerator,
         KeyCatalogue $catalogue,
         TranslationsCompiler $translationsCompiler,
-        KernelInterface $kernel,
-        string $cacheDir,
-        bool $isDebug
+        SimpleCacheFactory $cacheFactory,
+        KernelInterface $kernel
     )
     {
         if (!$translator instanceof TranslatorBagInterface)
@@ -70,9 +62,8 @@ class TranslationsExtractor
         $this->cacheDigestGenerator = $cacheDigestGenerator;
         $this->catalogue = $catalogue;
         $this->translationsCompiler = $translationsCompiler;
-        $this->cacheDir = $cacheDir;
-        $this->isDebug = $isDebug;
         $this->kernel = $kernel;
+        $this->cacheFactory = $cacheFactory;
     }
 
 
@@ -81,30 +72,30 @@ class TranslationsExtractor
      */
     public function fetchCatalogue (string $namespace, string $locale) : CachedCatalogue
     {
-        $cache = $this->getConfigCacheFactory()->cache(
-            "{$this->cacheDir}/" . \sprintf(self::CACHE_PATH, $namespace, $locale),
-            function (ConfigCacheInterface $cache) use ($namespace, $locale) : void
+        return $this->getCacheItem($namespace, $locale)->get();
+    }
+
+
+    /**
+     *
+     */
+    private function getCacheItem (string $namespace, string $locale) : SimpleCacheItemInterface
+    {
+        return $this->cacheFactory->getItem(
+            \sprintf(self::CACHE_KEY, $namespace, $locale),
+            function () use ($namespace, $locale)
             {
                 $compiledCatalogue = $this->translationsCompiler->compileCatalogue(
                     $this->extractCatalogue($namespace, $locale)
                 );
-                $digest = $this->cacheDigestGenerator->calculateDigest($compiledCatalogue);
 
-                $cache->write(
-                    \sprintf(
-                        '<?php return new %s(%s, %s);',
-                        CachedCatalogue::class,
-                        \var_export($digest, true),
-                        \var_export($compiledCatalogue, true)
-                    ),
-                    $this->getTrackedResources($locale)
+                return new CachedCatalogue(
+                    $this->cacheDigestGenerator->calculateDigest($compiledCatalogue),
+                    $compiledCatalogue
                 );
-            }
+            },
+            $this->getTrackedResources($locale)
         );
-
-        /** @var CachedCatalogue $catalogue */
-        $catalogue = include $cache->getPath();
-        return $catalogue;
     }
 
 
@@ -163,28 +154,6 @@ class TranslationsExtractor
 
 
     /**
-     * Creates and returns a new config cache
-     */
-    private function getConfigCacheFactory () : ConfigCacheFactoryInterface
-    {
-        if (null === $this->configCacheFactory)
-        {
-            $this->configCacheFactory = new ConfigCacheFactory($this->isDebug);
-        }
-
-        return $this->configCacheFactory;
-    }
-
-
-    /**
-     */
-    public function setConfigCacheFactory (ConfigCacheFactoryInterface $factory) : void
-    {
-        $this->configCacheFactory = $factory;
-    }
-
-
-    /**
      * @return ResourceInterface[]
      */
     private function getTrackedResources (string $locale) : array
@@ -204,5 +173,14 @@ class TranslationsExtractor
         }
 
         return $resources;
+    }
+
+
+    /**
+     * Resets + warms up the cache for the given combination.
+     */
+    public function resetCache (string $namespace, string $locale) : void
+    {
+        $this->getCacheItem($namespace, $locale)->warmup();
     }
 }
