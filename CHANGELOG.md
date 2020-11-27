@@ -1,3 +1,9 @@
+1.1.0
+=====
+
+*   (feature) Add `LinkedTranslationBuilder` and `LinkedTranslationBuilderFactory`.
+
+
 1.0.5
 =====
 
