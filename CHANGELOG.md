@@ -1,3 +1,9 @@
+1.1.1
+=====
+
+*   (bug) Try searching in the current `Request`'s locale first before looking in the main `Request`.
+
+
 1.1.0
 =====
 

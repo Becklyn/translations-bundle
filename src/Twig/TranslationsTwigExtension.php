@@ -39,14 +39,12 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
     {
         if (null === $locale)
         {
-            $request = $this->requestStack->getMasterRequest();
+            $locale = $this->getLocale();
 
-            if (null === $request)
+            if (null === $locale)
             {
                 return "<-- Can't embed, because no locale given -->";
             }
-
-            $locale = $request->getLocale();
         }
 
         return $this->locator->get(Environment::class)->render("@BecklynTranslations/init.html.twig", [
@@ -56,10 +54,28 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
     }
 
 
+    private function getLocale () : ?string
+    {
+        $locale = null;
+
+        if (null !== ($request = $this->requestStack->getCurrentRequest()))
+        {
+            $locale = $request->getLocale();
+        }
+
+        if (null === $locale && null !== ($request = $this->requestStack->getMasterRequest()))
+        {
+            $locale = $request->getLocale();
+        }
+
+        return $locale;
+    }
+
+
     /**
      * @inheritDoc
      */
-    public function getFunctions ()
+    public function getFunctions () : array
     {
         return [
             new TwigFunction("javascript_translations_init", [$this, "renderInit"], ["is_safe" => ["html"]]),
@@ -70,7 +86,7 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
     /**
      * @inheritDoc
      */
-    public static function getSubscribedServices ()
+    public static function getSubscribedServices () : array
     {
         return [
             Environment::class,
