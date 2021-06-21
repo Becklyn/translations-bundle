@@ -1,7 +1,12 @@
-1.1.1
+1.2.0
 =====
 
 *   (bug) Try searching in the current `Request`'s locale first before looking in the main `Request`.
+*   (improvement) Drop support for Symfony 4.x.
+*   (improvement) Set minimum PHP version to 7.4.
+*   (improvement) Add support fpr PHP 8.x.
+*   (internal) Update `TranslationsCacheWarmer` to match newer `CacheWarmerInterface` interface definitions.
+*   (internal) Always require newest version of `becklyn/php-cs`.
 
 
 1.1.0

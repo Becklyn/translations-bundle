@@ -8,15 +8,10 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class TranslationsCacheWarmer implements CacheWarmerInterface
 {
-    /** @var KeyCatalogue */
-    private $keyCatalogue;
-
-    /** @var TranslationsExtractor */
-    private $extractor;
+    private KeyCatalogue $keyCatalogue;
+    private TranslationsExtractor $extractor;
 
 
-    /**
-     */
     public function __construct (KeyCatalogue $keyCatalogue, TranslationsExtractor $extractor)
     {
         $this->keyCatalogue = $keyCatalogue;
@@ -27,7 +22,7 @@ class TranslationsCacheWarmer implements CacheWarmerInterface
     /**
      * @inheritDoc
      */
-    public function isOptional ()
+    public function isOptional () : bool
     {
         return false;
     }
@@ -36,7 +31,7 @@ class TranslationsCacheWarmer implements CacheWarmerInterface
     /**
      * @inheritDoc
      */
-    public function warmUp (string $cacheDir) : void
+    public function warmUp (string $cacheDir) : array
     {
         $locales = ["de", "en"];
 
@@ -47,5 +42,7 @@ class TranslationsCacheWarmer implements CacheWarmerInterface
                 $this->extractor->resetCache($namespace, $locale);
             }
         }
+
+        return [];
     }
 }

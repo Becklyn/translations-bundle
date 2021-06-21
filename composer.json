@@ -11,24 +11,24 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": ">=7.4",
         "ext-json": "*",
         "becklyn/cache": "^1.0.1",
         "becklyn/html-builder": "^2.1.1",
         "becklyn/icon-loader": "^2.1.1",
         "becklyn/rad": "^8.3.0",
-        "symfony/config": "^4.3 || ^5.0",
-        "symfony/dependency-injection": "^4.3 || ^5.0",
-        "symfony/framework-bundle": "^4.3 || ^5.0",
-        "symfony/http-kernel": "^4.3 || ^5.0",
-        "symfony/process": "^4.3 || ^5.0",
-        "symfony/translation": "^4.3 || ^5.0",
+        "symfony/config": "^5.3",
+        "symfony/dependency-injection": "^5.3",
+        "symfony/framework-bundle": "^5.3",
+        "symfony/http-kernel": "^5.3",
+        "symfony/process": "^5.3",
+        "symfony/translation": "^5.3",
         "symfony/translation-contracts": "^1.1 || ^2.0",
         "twig/twig": "^2.11 || ^3.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
-        "symfony/phpunit-bridge": "^5.0"
+        "symfony/phpunit-bridge": "^5.3"
     },
     "config": {
         "sort-packages": true
