@@ -1,3 +1,9 @@
+1.2.1
+=====
+
+*   (improvement) Add support for other installation directories of `node`.
+
+
 1.2.0
 =====
 
