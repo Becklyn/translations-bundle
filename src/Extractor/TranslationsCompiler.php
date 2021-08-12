@@ -58,6 +58,7 @@ class TranslationsCompiler
         $possibilities = [
             "/usr/local/bin/node",
             "/usr/bin/node",
+            "/opt/homebrew/bin/node",
         ];
 
         foreach ($possibilities as $path)
@@ -68,9 +69,17 @@ class TranslationsCompiler
             }
         }
 
+        $findNodeCommand = "command -v node";
+        $result = \trim(\shell_exec($findNodeCommand) ?: "");
+
+        if (!empty($result))
+        {
+            return $result;
+        }
+
         throw new TranslationsCompilationFailedException(\sprintf(
             "Could not find any node executable, looked in: %s",
-            \implode(", ", $possibilities)
+            \implode(", ", [...$possibilities, $findNodeCommand])
         ));
     }
 }
