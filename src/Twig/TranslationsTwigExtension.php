@@ -11,20 +11,10 @@ use Twig\TwigFunction;
 
 class TranslationsTwigExtension extends AbstractExtension implements ServiceSubscriberInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $locator;
+    private ContainerInterface $locator;
+    private RequestStack $requestStack;
 
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-
-    /**
-     */
     public function __construct (ContainerInterface $locator, RequestStack $requestStack)
     {
         $this->locator = $locator;
@@ -32,9 +22,6 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
     }
 
 
-    /**
-     *
-     */
     public function renderInit (string $namespace, ?string $locale = null) : string
     {
         if (null === $locale)
@@ -63,7 +50,7 @@ class TranslationsTwigExtension extends AbstractExtension implements ServiceSubs
             $locale = $request->getLocale();
         }
 
-        if (null === $locale && null !== ($request = $this->requestStack->getMasterRequest()))
+        if (null === $locale && null !== ($request = $this->requestStack->getMainRequest()))
         {
             $locale = $request->getLocale();
         }

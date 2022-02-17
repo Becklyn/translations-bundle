@@ -10,7 +10,7 @@ class BecklynTranslationsConfiguration implements ConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function getConfigTreeBuilder ()
+    public function getConfigTreeBuilder () : TreeBuilder
     {
         $treeBuilder = new TreeBuilder("becklyn_translations");
         $treeBuilder->getRootNode()

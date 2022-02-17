@@ -8,22 +8,15 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ExtractTranslationsPass implements CompilerPassInterface
 {
-    /**
-     * @var array
-     */
-    private $namespaceGroupedMap;
+    private array $namespaceGroupedMap;
 
 
-    /**
-     */
     public function __construct (array $namespaceGroupedMap)
     {
         $this->namespaceGroupedMap = $namespaceGroupedMap;
     }
 
 
-    /**
-     */
     public function process (ContainerBuilder $container) : void
     {
         $container->getDefinition(KeyCatalogue::class)
